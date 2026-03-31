@@ -1,16 +1,18 @@
-# LangChain & LangGraph 学习项目
+# LangChain、LangGraph、LlamaIndex & Neo4j 学习项目
 
 ## 学习者背景
 
 - **Python 水平**：中级，熟悉常用库（pandas、requests 等），有项目经验
-- **LLM 经验**：已系统学习 LangChain，正在学习 LangGraph
-- **学习目标**：系统掌握 LangChain 和 LangGraph，具备独立构建 LLM 应用和多步骤 Agent 的能力
+- **LLM 经验**：已系统学习 LangChain，正在学习 LangGraph、LlamaIndex 和 Neo4j
+- **学习目标**：系统掌握 LLM 应用开发全栈，具备独立构建 RAG 系统、知识图谱应用和多步骤 Agent 的能力
 - **教学语言**：中文讲解，代码注释可中可英
 
 ## 项目结构
 
 - `langchain/` — LangChain 教程 notebooks
 - `langgraph/` — LangGraph 教程 notebooks
+- `llamaindex/` — LlamaIndex 教程 notebooks（RAG 专项）
+- `neo4j/` — Neo4j & 知识图谱教程 notebooks
 - `ReAct/` — ReAct 实验代码（独立，不在教程体系内）
 
 ## 章节组织约定
@@ -45,7 +47,9 @@ uv add <package>
 
 ### 模型
 
-通过 `langchain-openai` 的 OpenAI 兼容接口接入模型（通义千问、GLM 等）。
+通过兼容接口接入模型：
+- **Qwen（通义千问）**：通过 `langchain-openai` / `llama-index-llms-openai` 的 OpenAI 兼容接口接入
+- **GLM（智谱清言）**：通过 `langchain-anthropic` / `llama-index-llms-anthropic` 的 Anthropic 兼容接口接入
 
 所有密钥和 API 地址统一存放在项目根目录的 `.env` 文件中：
 
@@ -54,9 +58,12 @@ Qwen_API_BASE=https://dashscope.aliyuncs.com/compatible-mode/v1
 Qwen_API_KEY=sk-...
 GLM_API_BASE=https://open.bigmodel.cn/api/paas/v4/
 GLM_API_KEY=...
+NEO4J_URI=bolt://localhost:7687
+NEO4J_USERNAME=neo4j
+NEO4J_PASSWORD=your_password
 ```
 
-每章开头统一使用以下初始化代码加载环境：
+#### LangChain / LangGraph / Neo4j 章节初始化（默认 Qwen）
 
 ```python
 import os
@@ -70,6 +77,59 @@ llm = ChatOpenAI(
     openai_api_base=os.environ["Qwen_API_BASE"],
     openai_api_key=os.environ["Qwen_API_KEY"],
 )
+
+# 切换为 GLM（Anthropic 兼容接口）：
+# from langchain_anthropic import ChatAnthropic
+# llm = ChatAnthropic(
+#     model="glm-4-plus",
+#     base_url=os.environ["GLM_API_BASE"],
+#     api_key=os.environ["GLM_API_KEY"],
+# )
+```
+
+#### LlamaIndex 章节初始化（默认 Qwen）
+
+```python
+import os
+from dotenv import load_dotenv
+load_dotenv("../.env")
+
+from llama_index.llms.openai import OpenAI
+from llama_index.embeddings.openai import OpenAIEmbedding
+from llama_index.core import Settings
+
+llm = OpenAI(
+    model="qwen-plus",
+    api_base=os.environ["Qwen_API_BASE"],
+    api_key=os.environ["Qwen_API_KEY"],
+)
+Settings.llm = llm
+Settings.embed_model = OpenAIEmbedding(
+    model="text-embedding-v3",
+    api_base=os.environ["Qwen_API_BASE"],
+    api_key=os.environ["Qwen_API_KEY"],
+)
+
+# 切换为 GLM（Anthropic 兼容接口）：
+# from llama_index.llms.anthropic import Anthropic
+# llm = Anthropic(
+#     model="glm-4-plus",
+#     base_url=os.environ["GLM_API_BASE"],
+#     api_key=os.environ["GLM_API_KEY"],
+# )
+# Settings.llm = llm
+```
+
+#### Neo4j 章节额外初始化（Ch04+）
+
+```python
+from langchain_neo4j import Neo4jGraph
+
+graph = Neo4jGraph(
+    url=os.environ["NEO4J_URI"],
+    username=os.environ["NEO4J_USERNAME"],
+    password=os.environ["NEO4J_PASSWORD"],
+)
 ```
 
 **绝不硬编码** API Key 或 API Base URL。`.env` 文件已加入 `.gitignore`，不纳入版本控制。
@@ -81,6 +141,12 @@ llm = ChatOpenAI(
 - `langgraph`（LangGraph 核心框架：状态图、节点、边）
 - `faiss-cpu`（向量检索，用于 RAG 章节）
 - `python-dotenv`（从 `.env` 文件加载环境变量）
+- `llama-index-core`、`llama-index-llms-openai`、`llama-index-llms-anthropic`、`llama-index-embeddings-openai`（LlamaIndex 核心）
+- `llama-index-vector-stores-faiss`、`llama-index-readers-file`、`llama-index-retrievers-bm25`（LlamaIndex 扩展）
+- `langchain-anthropic`（通过 Anthropic 兼容接口对接 GLM）
+- `neo4j`（Neo4j Python 驱动）
+- `langchain-neo4j`（LangChain Neo4j 集成：Neo4jGraph、Neo4jVector、GraphCypherQAChain）
+- `langchain-experimental`（LLMGraphTransformer 知识图谱自动构建）
 
 ## AI 协作约定
 
@@ -97,7 +163,9 @@ llm = ChatOpenAI(
 - **对比教学**：引入新概念时，先展示"不用这个特性怎么写"，再展示"用了之后的改进"，让差异一目了然
 - **预判报错**：当代码可能因版本、网络、API 限制等原因出错时，在代码单元格后补充"常见问题"说明，而非等学习者踩坑
 - **少说废话**：不堆砌营销话术，专注于"这个东西解决什么问题"和"怎么用"
-- **LangGraph 章节与 LangChain 对比**：学习者已有 LangChain 基础，适当说明两者的关系和区别，帮助迁移已有知识
+- **LangGraph 章节与 LangChain 对比**：学习者已有 LangChain 基��，适当说明两者的��系和区别，帮助迁移已有知识
+- **LlamaIndex 章节与 LangChain 对��**：学习者已有 LangChain RAG 经验，重点说明 LlamaIndex 的差异化优势（内置高级检索、一行代码 RAG）
+- **Neo4j 章节与 LangChain RAG 对比**：从向量检索过渡到图结构检索，说明两者互补关系
 
 ### 每次生成前的检查清单
 
