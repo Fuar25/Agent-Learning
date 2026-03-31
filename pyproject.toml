@@ -26,3 +26,8 @@ dependencies = [
     "langchain-neo4j>=0.9.0",
     "langchain-experimental>=0.4.0",
 ]
+
+[dependency-groups]
+dev = [
+    "nbstripout>=0.9.1",
+]
