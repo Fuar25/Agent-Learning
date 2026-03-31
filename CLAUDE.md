@@ -94,18 +94,19 @@ import os
 from dotenv import load_dotenv
 load_dotenv("../.env")
 
-from llama_index.llms.openai import OpenAI
-from llama_index.embeddings.openai import OpenAIEmbedding
+from llama_index.llms.openai_like import OpenAILike
+from llama_index.embeddings.openai_like import OpenAILikeEmbedding
 from llama_index.core import Settings
 
-llm = OpenAI(
+llm = OpenAILike(
     model="qwen-plus",
     api_base=os.environ["Qwen_API_BASE"],
     api_key=os.environ["Qwen_API_KEY"],
+    is_chat_model=True,
 )
 Settings.llm = llm
-Settings.embed_model = OpenAIEmbedding(
-    model="text-embedding-v3",
+Settings.embed_model = OpenAILikeEmbedding(
+    model_name="text-embedding-v3",
     api_base=os.environ["Qwen_API_BASE"],
     api_key=os.environ["Qwen_API_KEY"],
 )
@@ -141,7 +142,7 @@ graph = Neo4jGraph(
 - `langgraph`（LangGraph 核心框架：状态图、节点、边）
 - `faiss-cpu`（向量检索，用于 RAG 章节）
 - `python-dotenv`（从 `.env` 文件加载环境变量）
-- `llama-index-core`、`llama-index-llms-openai`、`llama-index-llms-anthropic`、`llama-index-embeddings-openai`（LlamaIndex 核心）
+- `llama-index-core`、`llama-index-llms-openai-like`、`llama-index-llms-anthropic`、`llama-index-embeddings-openai-like`（LlamaIndex 核心）
 - `llama-index-vector-stores-faiss`、`llama-index-readers-file`、`llama-index-retrievers-bm25`（LlamaIndex 扩展）
 - `langchain-anthropic`（通过 Anthropic 兼容接口对接 GLM）
 - `neo4j`（Neo4j Python 驱动）
