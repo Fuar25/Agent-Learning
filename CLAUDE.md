@@ -48,8 +48,8 @@ uv add <package>
 ### 模型
 
 通过兼容接口接入模型：
-- **Qwen（通义千问）**：通过 `langchain-openai` / `llama-index-llms-openai` 的 OpenAI 兼容接口接入
-- **GLM（智谱清言）**：通过 `langchain-anthropic` / `llama-index-llms-anthropic` 的 Anthropic 兼容接口接入
+- **Qwen（通义千问）**：通过 `langchain-openai` / `llama-index-llms-openai-like` 的 OpenAI 兼容接口接入
+- **GLM（智谱清言）**：通过 `langchain-openai` / `llama-index-llms-openai-like` 的 OpenAI 兼容接口接入（同一套接口，不同 api_base/api_key）
 
 所有密钥和 API 地址统一存放在项目根目录的 `.env` 文件中：
 
@@ -78,12 +78,11 @@ llm = ChatOpenAI(
     openai_api_key=os.environ["Qwen_API_KEY"],
 )
 
-# 切换为 GLM（Anthropic 兼容接口）：
-# from langchain_anthropic import ChatAnthropic
-# llm = ChatAnthropic(
+# 切换为 GLM（同样是 OpenAI 兼容接口）：
+# llm = ChatOpenAI(
 #     model="glm-4-plus",
-#     base_url=os.environ["GLM_API_BASE"],
-#     api_key=os.environ["GLM_API_KEY"],
+#     openai_api_base=os.environ["GLM_API_BASE"],
+#     openai_api_key=os.environ["GLM_API_KEY"],
 # )
 ```
 
@@ -111,12 +110,12 @@ Settings.embed_model = OpenAILikeEmbedding(
     api_key=os.environ["Qwen_API_KEY"],
 )
 
-# 切换为 GLM（Anthropic 兼容接口）：
-# from llama_index.llms.anthropic import Anthropic
-# llm = Anthropic(
+# 切换为 GLM（同样是 OpenAI 兼容接口）：
+# llm = OpenAILike(
 #     model="glm-4-plus",
-#     base_url=os.environ["GLM_API_BASE"],
+#     api_base=os.environ["GLM_API_BASE"],
 #     api_key=os.environ["GLM_API_KEY"],
+#     is_chat_model=True,
 # )
 # Settings.llm = llm
 ```
@@ -144,7 +143,7 @@ graph = Neo4jGraph(
 - `python-dotenv`（从 `.env` 文件加载环境变量）
 - `llama-index-core`、`llama-index-llms-openai-like`、`llama-index-llms-anthropic`、`llama-index-embeddings-openai-like`（LlamaIndex 核心）
 - `llama-index-vector-stores-faiss`、`llama-index-readers-file`、`llama-index-retrievers-bm25`（LlamaIndex 扩展）
-- `langchain-anthropic`（通过 Anthropic 兼容接口对接 GLM）
+- `langchain-anthropic`（预留 Anthropic 兼容接口）
 - `neo4j`（Neo4j Python 驱动）
 - `langchain-neo4j`（LangChain Neo4j 集成：Neo4jGraph、Neo4jVector、GraphCypherQAChain）
 - `langchain-experimental`（LLMGraphTransformer 知识图谱自动构建）
